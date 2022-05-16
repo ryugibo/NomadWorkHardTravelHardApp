@@ -34,6 +34,14 @@ export default function App() {
     const s = await AsyncStorage.getItem(STORAGE_KEY);
     setToDos(JSON.parse(s));
   };
+  const deleteToDo = (key) => {
+    setToDos((toDos) => {
+      const newToDos = { ...toDos };
+      delete newToDos[key];
+      return newToDos;
+    });
+  };
+
   useEffect(() => {
     loadToDos();
   }, []);
@@ -73,6 +81,9 @@ export default function App() {
           toDos[key].working === working ? (
             <View style={styles.toDo} key={key}>
               <Text style={styles.toDoText}>{toDos[key].text}</Text>
+              <TouchableOpacity onPress={() => deleteToDo(key)}>
+                <Text>❌</Text>
+              </TouchableOpacity>
             </View>
           ) : null
         )}
@@ -110,6 +121,8 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     paddingHorizontal: 20,
     borderRadius: 15,
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   toDoText: { color: "white", fontSize: 16, fontWeight: "500" },
 });
