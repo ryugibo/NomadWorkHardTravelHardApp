@@ -6,9 +6,11 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
+  Alert,
 } from "react-native";
 import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Fontisto } from "@expo/vector-icons";
 import { theme } from "./colors";
 
 const STORAGE_KEY = "@toDos";
@@ -35,11 +37,22 @@ export default function App() {
     setToDos(JSON.parse(s));
   };
   const deleteToDo = (key) => {
-    setToDos((toDos) => {
-      const newToDos = { ...toDos };
-      delete newToDos[key];
-      return newToDos;
-    });
+    console.log("A");
+    Alert.alert("Delete To Do?", "Are you sure?", [
+      {
+        text: "Cancel",
+      },
+      {
+        text: "OK",
+        onPress: () => {
+          setToDos((toDos) => {
+            const newToDos = { ...toDos };
+            delete newToDos[key];
+            return newToDos;
+          });
+        },
+      },
+    ]);
   };
 
   useEffect(() => {
@@ -82,7 +95,9 @@ export default function App() {
             <View style={styles.toDo} key={key}>
               <Text style={styles.toDoText}>{toDos[key].text}</Text>
               <TouchableOpacity onPress={() => deleteToDo(key)}>
-                <Text>❌</Text>
+                <Text>
+                  <Fontisto name="trash" color={theme.grey} size={18} />
+                </Text>
               </TouchableOpacity>
             </View>
           ) : null
