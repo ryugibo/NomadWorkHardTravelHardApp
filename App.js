@@ -21,6 +21,8 @@ export default function App() {
   const [working, setWorking] = useState(true);
   const [text, setText] = useState("");
   const [toDos, setToDos] = useState({});
+  const [editToDo, setEditToDo] = useState(undefined);
+  const [editToDoText, setEditToDoText] = useState("");
   const travel = () => setWorking(false);
   const work = () => setWorking(true);
   const onChangeText = (payload) => setText(payload);
@@ -39,6 +41,9 @@ export default function App() {
   };
   const loadToDos = async () => {
     const s = await AsyncStorage.getItem(STORAGE_KEY);
+    if (!s) {
+      return;
+    }
     setToDos(JSON.parse(s));
   };
   const deleteToDo = (key) => {
@@ -59,7 +64,6 @@ export default function App() {
     ]);
   };
   const completeToDo = (key) => {
-    console.log(toDos[key].complete, key);
     setToDos((toDos) => ({
       ...toDos,
       [key]: { ...toDos[key], complete: !toDos[key].complete },
@@ -75,6 +79,17 @@ export default function App() {
     }
     setWorking(JSON.parse(s));
   };
+  const updateToDo = (key) => {
+    setToDos((toDos) => ({
+      ...toDos,
+      [key]: { ...toDos[key], text: editToDoText },
+    }));
+    endEditTodo();
+  };
+  const endEditTodo = () => {
+    setEditToDo(undefined);
+    setEditToDoText("");
+  };
 
   useEffect(() => {
     loadToDos();
@@ -86,8 +101,6 @@ export default function App() {
   useEffect(() => {
     saveWorking(working);
   }, [working]);
-
-  console.log(toDos);
 
   return (
     <View style={styles.container}>
@@ -142,15 +155,35 @@ export default function App() {
                     )}
                   </Text>
                 </TouchableOpacity>
-                <Text
-                  style={
-                    toDos[key].complete
-                      ? styles.toDoTextComplete
-                      : styles.toDoText
-                  }
+                <TouchableOpacity
+                  style={{ flex: 1 }}
+                  onPress={() => {
+                    setEditToDo(key);
+                    setEditToDoText(toDos[key].text);
+                  }}
                 >
-                  {toDos[key].text}
-                </Text>
+                  {key === editToDo ? (
+                    <TextInput
+                      style={styles.toDoEditText}
+                      onChangeText={setEditToDoText}
+                      onSubmitEditing={() => updateToDo(key)}
+                      value={editToDoText}
+                      returnKeyType="done"
+                      autoFocus={true}
+                      onEndEditing={endEditTodo}
+                    />
+                  ) : (
+                    <Text
+                      style={
+                        toDos[key].complete
+                          ? styles.toDoTextComplete
+                          : styles.toDoText
+                      }
+                    >
+                      {toDos[key].text}
+                    </Text>
+                  )}
+                </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.toDoBtn}
                   onPress={() => deleteToDo(key)}
@@ -211,6 +244,12 @@ const styles = StyleSheet.create({
     flex: 1,
     textDecorationLine: "line-through",
     color: theme.grey,
+  },
+  toDoEditText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "500",
+    flex: 1,
   },
   toDoBtn: {
     paddingHorizontal: 20,
