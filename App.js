@@ -15,6 +15,8 @@ import { theme } from "./colors";
 
 const STORAGE_KEY = "@toDos";
 
+const TAB_KEY = "@tab";
+
 export default function App() {
   const [working, setWorking] = useState(true);
   const [text, setText] = useState("");
@@ -54,13 +56,27 @@ export default function App() {
       },
     ]);
   };
+  const saveWorking = async (working) => {
+    await AsyncStorage.setItem(TAB_KEY, JSON.stringify(working));
+  };
+  const loadWorking = async () => {
+    const s = await AsyncStorage.getItem(TAB_KEY);
+    if (!s) {
+      return;
+    }
+    setWorking(JSON.parse(s));
+  };
 
   useEffect(() => {
     loadToDos();
+    loadWorking();
   }, []);
   useEffect(() => {
     saveToDos(toDos);
   }, [toDos]);
+  useEffect(() => {
+    saveWorking(working);
+  }, [working]);
 
   return (
     <View style={styles.container}>
